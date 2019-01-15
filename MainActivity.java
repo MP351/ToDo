@@ -5,6 +5,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatSpinner;
+import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,7 +17,7 @@ import android.support.v7.widget.Toolbar;
 
 import com.example.maxpayne.mytodoapp.db.Database;
 import com.example.maxpayne.mytodoapp.db.DbContract;
-import com.example.maxpayne.mytodoapp.recycler_view.CursorAdapter;
+import com.example.maxpayne.mytodoapp.ui.CursorAdapter;
 
 public class MainActivity extends AppCompatActivity implements AddDialog.NoticeDialogListener, DetailTaskDialog.NoticeDialogListener {
     ListView rv;

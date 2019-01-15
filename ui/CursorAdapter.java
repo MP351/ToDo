@@ -1,4 +1,4 @@
-package com.example.maxpayne.mytodoapp.recycler_view;
+package com.example.maxpayne.mytodoapp.ui;
 
 import android.content.Context;
 import android.database.Cursor;
