@@ -5,7 +5,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatSpinner;
-import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
         //getSupportActionBar().setIcon(R.mipmap.icon_launcher);
 
         db = new Database(this);
-        rv = findViewById(R.id.rvList);
+        rv = findViewById(R.id.lv);
         fab = findViewById(R.id.fab);
         myTb = findViewById(R.id.tb);
 
