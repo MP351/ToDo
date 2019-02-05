@@ -16,7 +16,7 @@ import android.support.v7.widget.Toolbar;
 
 import com.example.maxpayne.mytodoapp.db.Database;
 import com.example.maxpayne.mytodoapp.db.DbContract;
-import com.example.maxpayne.mytodoapp.recycler_view.CursorAdapter;
+import com.example.maxpayne.mytodoapp.ui.CursorAdapter;
 
 public class MainActivity extends AppCompatActivity implements AddDialog.NoticeDialogListener, DetailTaskDialog.NoticeDialogListener {
     ListView rv;
@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
         //getSupportActionBar().setIcon(R.mipmap.icon_launcher);
 
         db = new Database(this);
-        rv = findViewById(R.id.rvList);
+        rv = findViewById(R.id.lv);
         fab = findViewById(R.id.fab);
         myTb = findViewById(R.id.tb);
 
