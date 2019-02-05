@@ -13,17 +13,28 @@ import android.widget.TextView;
 
 import com.example.maxpayne.mytodoapp.DetailTaskDialog;
 import com.example.maxpayne.mytodoapp.R;
+import com.example.maxpayne.mytodoapp.db.Database;
 import com.example.maxpayne.mytodoapp.db.DbContract;
 
-public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecyclerViewAdapter.CursorViewHolder> {
+public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecyclerViewAdapter.CursorViewHolder> implements ItemTouchHelperAdapter{
     private Cursor cursor;
     private Context context;
     private FragmentManager fm;
+    private Database db;
 
-    CursorRecyclerViewAdapter(Context context, Cursor cursor, FragmentManager fm) {
+    private int selectionCode = 0;
+    private final int SELECTION_ALL_CODE = 0;
+    private final int SELECTION_INCOMPLETE_CODE = 1;
+    private final int SELECTION_COMPLETE_CODE = 2;
+    private final int SELECTION_CANCEL_CODE = 3;
+    private final int SELECTION_ARCHIVED_CODE = 4;
+
+    CursorRecyclerViewAdapter(Context context, FragmentManager fm) {
         this.context = context;
-        this.cursor = cursor;
         this.fm = fm;
+
+        db = new Database(context);
+        cursor = db.getAllTasks();
         this.cursor.moveToFirst();
     }
 
@@ -93,8 +104,62 @@ public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecycl
         }
     }
 
-    public void changeCursor(Cursor cursor) {
-        this.cursor = cursor;
-        this.notifyDataSetChanged();
+    @Override
+    public void onLeftSwipe(int position) {
+        cursor.moveToPosition(position);
+        int complete_code = cursor.getInt(
+                cursor.getColumnIndexOrThrow(DbContract.ToDoEntry.COLUMN_NAME_COMPLETE));
+
+        if (complete_code == DbContract.ToDoEntry.COMPLETE_CODE) {
+            archiveTask(cursor.getInt(cursor.getColumnIndexOrThrow(DbContract.ToDoEntry._ID)));
+        } else {
+            cancelTask(cursor.getInt(cursor.getColumnIndexOrThrow(DbContract.ToDoEntry._ID)));
+        }
+    }
+
+    public void completeTask(int id) {
+        db.completeTask(id);
+        renewList();
+    }
+
+    public void cancelTask(int id) {
+        db.cancelTask(id);
+        renewList();
+    }
+
+    public void archiveTask(int id) {
+        db.archiveTask(id);
+        renewList();
+    }
+
+    public void addTask(String tn, String dc) {
+        db.addTask(tn, dc);
+        renewList();
+    }
+
+    public void renewList() {
+        switch (selectionCode) {
+            case SELECTION_ALL_CODE:
+                cursor = db.getAllTasks();
+                break;
+            case SELECTION_INCOMPLETE_CODE:
+                cursor = db.getTaskByState(DbContract.ToDoEntry.INCOMPLETE_CODE);
+                break;
+            case SELECTION_COMPLETE_CODE:
+                cursor = db.getTaskByState(DbContract.ToDoEntry.COMPLETE_CODE);
+                break;
+            case SELECTION_CANCEL_CODE:
+                cursor = db.getTaskByState(DbContract.ToDoEntry.CANCEL_CODE);
+                break;
+            case SELECTION_ARCHIVED_CODE:
+                cursor = db.getTaskByArchivedState(DbContract.ToDoEntry.ARCHIVED_CODE);
+                break;
+        }
+        notifyDataSetChanged();
+    }
+
+    public void setSelectionCode(int code) {
+        selectionCode = code;
+        renewList();
     }
 }
