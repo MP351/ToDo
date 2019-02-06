@@ -1,6 +1,5 @@
 package com.example.maxpayne.mytodoapp.recycler_view;
 
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -10,7 +9,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,11 +18,10 @@ import android.widget.ArrayAdapter;
 import com.example.maxpayne.mytodoapp.AddDialog;
 import com.example.maxpayne.mytodoapp.DetailTaskDialog;
 import com.example.maxpayne.mytodoapp.R;
-import com.example.maxpayne.mytodoapp.db.Database;
 
-public class RVMainActivity extends AppCompatActivity implements AddDialog.NoticeDialogListener, DetailTaskDialog.NoticeDialogListener {
+public class RVMainActivity extends AppCompatActivity implements AddDialog.NoticeDialogListener,
+        DetailTaskDialog.NoticeDialogListener {
     RecyclerView rv;
-    Database db;
     CursorRecyclerViewAdapter cra;
     final int OPTIONS_MENU_ADD = 0;
     FloatingActionButton fab;
@@ -35,7 +32,6 @@ public class RVMainActivity extends AppCompatActivity implements AddDialog.Notic
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_rv);
 
-        db = new Database(this);
         rv = findViewById(R.id.rvList);
         myTb = findViewById(R.id.RvTb);
         fab = findViewById(R.id.RvFab);

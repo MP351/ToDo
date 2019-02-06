@@ -2,6 +2,7 @@ package com.example.maxpayne.mytodoapp.recycler_view;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.RecyclerView;
@@ -43,15 +44,14 @@ public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecycl
     public CursorViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         CursorViewHolder cvh;
         if (viewGroup.getTag() == null) {
-            View view = LayoutInflater.from(viewGroup.getContext())
-                    .inflate(R.layout.item, viewGroup, false);
-            cvh = new CursorViewHolder(view);
-            viewGroup.setTag(cvh);
+            //View view = LayoutInflater.from(viewGroup.getContext())
+            //        .inflate(R.layout.item, viewGroup, false);
+            //cvh = new CursorViewHolder(view);
+            //viewGroup.setTag(cvh);
         } else {
             cvh = (CursorViewHolder) viewGroup.getTag();
         }
-        return new CursorViewHolder(LayoutInflater.from(viewGroup.getContext())
-                .inflate(R.layout.item, viewGroup, false));
+        return new CursorViewHolder(viewGroup);
     }
 
     @Override
@@ -96,8 +96,9 @@ public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecycl
         public TextView tvNumber;
         public CheckedTextView chtvTask;
 
-        public CursorViewHolder(@NonNull View itemView) {
-            super(itemView);
+        public CursorViewHolder(ViewGroup parent) {
+            super(LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item, parent, false));
 
             tvNumber = itemView.findViewById(R.id.tv);
             chtvTask = itemView.findViewById(R.id.ctv);
@@ -161,5 +162,20 @@ public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecycl
     public void setSelectionCode(int code) {
         selectionCode = code;
         renewList();
+    }
+
+    private void pendingToCancel(final int position) {
+        pendingOperation(() -> cancelTask(position));
+    }
+
+    private void pendingToArchive(final int position) {
+        pendingOperation(() -> archiveTask(position));
+    }
+
+    private void pendingOperation(Runnable task) {
+        final int PENDING_TIMER = 3000; // 3 sec
+
+        Handler handler = new Handler();
+        handler.postDelayed(task, PENDING_TIMER);
     }
 }
