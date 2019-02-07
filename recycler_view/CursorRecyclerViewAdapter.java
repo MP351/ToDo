@@ -4,12 +4,16 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckedTextView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.maxpayne.mytodoapp.DetailTaskDialog;
@@ -17,11 +21,15 @@ import com.example.maxpayne.mytodoapp.R;
 import com.example.maxpayne.mytodoapp.db.Database;
 import com.example.maxpayne.mytodoapp.db.DbContract;
 
+import java.util.ArrayList;
+
 public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecyclerViewAdapter.CursorViewHolder> implements ItemTouchHelperAdapter{
     private Cursor cursor;
     private Context context;
     private FragmentManager fm;
     private Database db;
+
+    private ArrayList<Integer> pend = new ArrayList<>();
 
     private int selectionCode = 0;
     private final int SELECTION_ALL_CODE = 0;
@@ -68,23 +76,30 @@ public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecycl
         final String descr = cursor.getString(
                 cursor.getColumnIndexOrThrow(DbContract.ToDoEntry.COLUMN_NAME_DESCRIPTION));
 
-        cursorViewHolder.tvNumber.setText(_id);
-        cursorViewHolder.chtvTask.setText(taskN);
-        cursorViewHolder.chtvTask.setChecked(cursor.getInt(
-                cursor.getColumnIndexOrThrow(DbContract.ToDoEntry.COLUMN_NAME_COMPLETE))
-                == DbContract.ToDoEntry.COMPLETE_CODE);
-        cursorViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DetailTaskDialog dtd = new DetailTaskDialog();
-                dtd.set_id(Integer.parseInt(_id));
-                dtd.setTaskHead(taskN);
-                dtd.setAddDate(addDate);
-                dtd.setEndDate(endDate);
-                dtd.setTaskDescription(descr);
-                dtd.show(fm, "detailDialog");
-            }
-        });
+        if (pend.contains(Integer.valueOf(_id))) {
+            cursorViewHolder.viewForeground.setVisibility(View.GONE);
+            cursorViewHolder.viewBackground.setVisibility(View.VISIBLE);
+        } else {
+            cursorViewHolder.viewForeground.setVisibility(View.VISIBLE);
+            cursorViewHolder.viewBackground.setVisibility(View.GONE);
+            cursorViewHolder.tvNumber.setText(_id);
+            cursorViewHolder.chtvTask.setText(taskN);
+            cursorViewHolder.chtvTask.setChecked(cursor.getInt(
+                    cursor.getColumnIndexOrThrow(DbContract.ToDoEntry.COLUMN_NAME_COMPLETE))
+                    == DbContract.ToDoEntry.COMPLETE_CODE);
+            cursorViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    DetailTaskDialog dtd = new DetailTaskDialog();
+                    dtd.set_id(Integer.parseInt(_id));
+                    dtd.setTaskHead(taskN);
+                    dtd.setAddDate(addDate);
+                    dtd.setEndDate(endDate);
+                    dtd.setTaskDescription(descr);
+                    dtd.show(fm, "detailDialog");
+                }
+            });
+        }
     }
 
     @Override
@@ -92,16 +107,28 @@ public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecycl
         return cursor.getCount();
     }
 
-    public static class CursorViewHolder extends RecyclerView.ViewHolder {
-        public TextView tvNumber;
-        public CheckedTextView chtvTask;
+    static class CursorViewHolder extends RecyclerView.ViewHolder {
+        TextView tvNumber;
+        CheckedTextView chtvTask;
 
-        public CursorViewHolder(ViewGroup parent) {
+        TextView tvUdo;
+        Button btnUdo;
+
+        ConstraintLayout viewBackground;
+        CardView viewForeground;
+
+        CursorViewHolder(ViewGroup parent) {
             super(LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item, parent, false));
 
             tvNumber = itemView.findViewById(R.id.tv);
             chtvTask = itemView.findViewById(R.id.ctv);
+
+            tvUdo = itemView.findViewById(R.id.tvUdo);
+            btnUdo = itemView.findViewById(R.id.btnUdo);
+
+            viewForeground = itemView.findViewById(R.id.view_foreground);
+            viewBackground = itemView.findViewById(R.id.view_background);
         }
     }
 
@@ -112,9 +139,13 @@ public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecycl
                 cursor.getColumnIndexOrThrow(DbContract.ToDoEntry.COLUMN_NAME_COMPLETE));
 
         if (complete_code == DbContract.ToDoEntry.COMPLETE_CODE) {
-            archiveTask(cursor.getInt(cursor.getColumnIndexOrThrow(DbContract.ToDoEntry._ID)));
+            //archiveTask(cursor.getInt(cursor.getColumnIndexOrThrow(DbContract.ToDoEntry._ID)));
+            pend.add(cursor.getInt(cursor.getColumnIndexOrThrow(DbContract.ToDoEntry._ID)));
+            notifyItemChanged(position);
         } else {
-            cancelTask(cursor.getInt(cursor.getColumnIndexOrThrow(DbContract.ToDoEntry._ID)));
+            pend.add(cursor.getInt(cursor.getColumnIndexOrThrow(DbContract.ToDoEntry._ID)));
+            notifyItemChanged(position);
+            //cancelTask(cursor.getInt(cursor.getColumnIndexOrThrow(DbContract.ToDoEntry._ID)));
         }
     }
 
@@ -164,12 +195,12 @@ public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecycl
         renewList();
     }
 
-    private void pendingToCancel(final int position) {
-        pendingOperation(() -> cancelTask(position));
+    private void pendingToCancel(final int id) {
+        pendingOperation(() -> cancelTask(id));
     }
 
-    private void pendingToArchive(final int position) {
-        pendingOperation(() -> archiveTask(position));
+    private void pendingToArchive(final int id) {
+        pendingOperation(() -> archiveTask(id));
     }
 
     private void pendingOperation(Runnable task) {

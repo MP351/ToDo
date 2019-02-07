@@ -21,4 +21,9 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.SimpleCallback {
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
         adapter.onLeftSwipe(viewHolder.getAdapterPosition());
     }
+
+    @Override
+    public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+        return super.getMovementFlags(recyclerView, viewHolder);
+    }
 }
