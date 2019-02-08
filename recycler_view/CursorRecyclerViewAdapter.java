@@ -2,7 +2,6 @@ package com.example.maxpayne.mytodoapp.recycler_view;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.FragmentManager;
@@ -13,17 +12,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckedTextView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.maxpayne.mytodoapp.DetailTaskDialog;
 import com.example.maxpayne.mytodoapp.R;
 import com.example.maxpayne.mytodoapp.db.Database;
 import com.example.maxpayne.mytodoapp.db.DbContract;
+import com.example.maxpayne.mytodoapp.db.DbObserver;
 
 import java.util.ArrayList;
 
-public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecyclerViewAdapter.CursorViewHolder> implements ItemTouchHelperAdapter{
+public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecyclerViewAdapter.CursorViewHolder> implements ItemTouchHelperAdapter, DbObserver {
     private Cursor cursor;
     private Context context;
     private FragmentManager fm;
@@ -31,18 +30,11 @@ public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecycl
 
     private ArrayList<Integer> pend = new ArrayList<>();
 
-    private int selectionCode = 0;
-    private final int SELECTION_ALL_CODE = 0;
-    private final int SELECTION_INCOMPLETE_CODE = 1;
-    private final int SELECTION_COMPLETE_CODE = 2;
-    private final int SELECTION_CANCEL_CODE = 3;
-    private final int SELECTION_ARCHIVED_CODE = 4;
-
-    CursorRecyclerViewAdapter(Context context, FragmentManager fm) {
+    CursorRecyclerViewAdapter(Context context, Database db, FragmentManager fm) {
         this.context = context;
         this.fm = fm;
 
-        db = new Database(context);
+        this.db = db;
         cursor = db.getAllTasks();
         this.cursor.moveToFirst();
     }
@@ -149,64 +141,14 @@ public class CursorRecyclerViewAdapter extends RecyclerView.Adapter<CursorRecycl
         }
     }
 
-    public void completeTask(int id) {
-        db.completeTask(id);
-        renewList();
-    }
-
-    public void cancelTask(int id) {
-        db.cancelTask(id);
-        renewList();
-    }
-
-    public void archiveTask(int id) {
-        db.archiveTask(id);
-        renewList();
-    }
-
-    public void addTask(String tn, String dc) {
-        db.addTask(tn, dc);
-        renewList();
-    }
-
-    public void renewList() {
-        switch (selectionCode) {
-            case SELECTION_ALL_CODE:
-                cursor = db.getAllTasks();
-                break;
-            case SELECTION_INCOMPLETE_CODE:
-                cursor = db.getTaskByState(DbContract.ToDoEntry.INCOMPLETE_CODE);
-                break;
-            case SELECTION_COMPLETE_CODE:
-                cursor = db.getTaskByState(DbContract.ToDoEntry.COMPLETE_CODE);
-                break;
-            case SELECTION_CANCEL_CODE:
-                cursor = db.getTaskByState(DbContract.ToDoEntry.CANCEL_CODE);
-                break;
-            case SELECTION_ARCHIVED_CODE:
-                cursor = db.getTaskByArchivedState(DbContract.ToDoEntry.ARCHIVED_CODE);
-                break;
-        }
+    public void changeCursor(Cursor cursor) {
+        this.cursor = cursor;
         notifyDataSetChanged();
     }
 
-    public void setSelectionCode(int code) {
-        selectionCode = code;
-        renewList();
-    }
-
-    private void pendingToCancel(final int id) {
-        pendingOperation(() -> cancelTask(id));
-    }
-
-    private void pendingToArchive(final int id) {
-        pendingOperation(() -> archiveTask(id));
-    }
-
-    private void pendingOperation(Runnable task) {
-        final int PENDING_TIMER = 3000; // 3 sec
-
-        Handler handler = new Handler();
-        handler.postDelayed(task, PENDING_TIMER);
+    @Override
+    public void notifyObserver() {
+        cursor.requery();
+        notifyDataSetChanged();
     }
 }

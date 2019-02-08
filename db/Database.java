@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-public class Database {
+public class Database implements DbObservable{
     private Context context;
     private SQLiteOpenHelper sqLiteOpenHelper;
     private SQLiteDatabase db;
@@ -26,30 +26,6 @@ public class Database {
 
         return db.query(DbContract.ToDoEntry.TABLE_NAME, null,
                 selection, selArgs, null, null, null);
-    }
-
-    public long addTask(String task, String description) {
-        ContentValues cv = new ContentValues();
-        cv.put(DbContract.ToDoEntry.COLUMN_NAME_TASK, task);
-        cv.put(DbContract.ToDoEntry.COLUMN_NAME_ADD_DATE, System.currentTimeMillis());
-        cv.put(DbContract.ToDoEntry.COLUMN_NAME_COMPLETE, DbContract.ToDoEntry.INCOMPLETE_CODE);
-        cv.put(DbContract.ToDoEntry.COLUMN_NAME_DESCRIPTION, description);
-        return db.insert(DbContract.ToDoEntry.TABLE_NAME, null, cv);
-    }
-
-    public long completeTask(long id) {
-        ContentValues cv = new ContentValues();
-        cv.put(DbContract.ToDoEntry.COLUMN_NAME_COMPLETE, DbContract.ToDoEntry.COMPLETE_CODE);
-        cv.put(DbContract.ToDoEntry.COLUMN_NAME_END_DATE, System.currentTimeMillis());
-        String[] where = { String.valueOf(id) };
-        return db.update(DbContract.ToDoEntry.TABLE_NAME, cv, DbContract.ToDoEntry._ID + " = ?", where);
-    }
-
-    public long cancelTask(long id) {
-        ContentValues cv = new ContentValues();
-        cv.put(DbContract.ToDoEntry.COLUMN_NAME_COMPLETE, DbContract.ToDoEntry.CANCEL_CODE);
-        String[] where = { String.valueOf(id) };
-        return db.update(DbContract.ToDoEntry.TABLE_NAME, cv, DbContract.ToDoEntry._ID + " = ?", where);
     }
 
     public Cursor getTaskById(long _id) {
@@ -75,10 +51,69 @@ public class Database {
                 null, null, null);
     }
 
+    public long addTask(String task, String description) {
+        ContentValues cv = new ContentValues();
+        cv.put(DbContract.ToDoEntry.COLUMN_NAME_TASK, task);
+        cv.put(DbContract.ToDoEntry.COLUMN_NAME_ADD_DATE, System.currentTimeMillis());
+        cv.put(DbContract.ToDoEntry.COLUMN_NAME_COMPLETE, DbContract.ToDoEntry.INCOMPLETE_CODE);
+        cv.put(DbContract.ToDoEntry.COLUMN_NAME_DESCRIPTION, description);
+        long count = db.insert(DbContract.ToDoEntry.TABLE_NAME, null, cv);
+        notifyObservers();
+        return count;
+    }
+
+    public long completeTask(long id) {
+        ContentValues cv = new ContentValues();
+        cv.put(DbContract.ToDoEntry.COLUMN_NAME_COMPLETE, DbContract.ToDoEntry.COMPLETE_CODE);
+        cv.put(DbContract.ToDoEntry.COLUMN_NAME_END_DATE, System.currentTimeMillis());
+        String[] where = { String.valueOf(id) };
+        long count = db.update(DbContract.ToDoEntry.TABLE_NAME, cv, DbContract.ToDoEntry._ID + " = ?", where);
+        notifyObservers();
+        return count;
+    }
+
+    public long cancelTask(long id) {
+        ContentValues cv = new ContentValues();
+        cv.put(DbContract.ToDoEntry.COLUMN_NAME_COMPLETE, DbContract.ToDoEntry.CANCEL_CODE);
+        String[] where = { String.valueOf(id) };
+        long count = db.update(DbContract.ToDoEntry.TABLE_NAME, cv, DbContract.ToDoEntry._ID + " = ?", where);
+        notifyObservers();
+        return count;
+    }
+
     public long archiveTask(long id) {
         ContentValues cv = new ContentValues();
         cv.put(DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED, DbContract.ToDoEntry.ARCHIVED_CODE);
         String[] where = { String.valueOf(id) };
-        return db.update(DbContract.ToDoEntry.TABLE_NAME, cv, DbContract.ToDoEntry._ID + " = ?", where);
+        long count = db.update(DbContract.ToDoEntry.TABLE_NAME, cv, DbContract.ToDoEntry._ID + " = ?", where);
+        notifyObservers();
+        return count;
+    }
+
+    @Override
+    public boolean addObserver(DbObserver observer) {
+        if (!observers.contains(observer)) {
+            observers.add(observer);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean removeObserver(DbObserver observer) {
+        if (observers.contains(observer)) {
+            observers.remove(observer);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public void notifyObservers() {
+        for (DbObserver observer : observers) {
+            observer.notifyObserver();
+        }
     }
 }

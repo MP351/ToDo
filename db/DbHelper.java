@@ -19,12 +19,6 @@ public class DbHelper extends SQLiteOpenHelper {
         if (oldVersion == 1 && newVersion == 2) {
             db.beginTransaction();
             try {
-                /*db.execSQL("CREATE TABLE TMP(" + DbContract.ToDoEntry._ID + " INTEGER PRIMARY KEY, " +
-                        DbContract.ToDoEntry.COLUMN_NAME_TASK + " TEXT, " +
-                        DbContract.ToDoEntry.COLUMN_NAME_ADD_DATE + " INTEGER, " +
-                        DbContract.ToDoEntry.COLUMN_NAME_END_DATE + " INTEGER," +
-                        DbContract.ToDoEntry.COLUMN_NAME_COMPLETE + " INTEGER," +
-                        DbContract.ToDoEntry.COLUMN_NAME_DESCRIPTION + " TEXT" + ")");*/
                 db.execSQL("ALTER TABLE " + DbContract.ToDoEntry.TABLE_NAME + " ADD COLUMN " +
                         DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED + " INTEGER DEFAULT "
                         + DbContract.ToDoEntry.NOT_ARCHIVED_CODE + ";");

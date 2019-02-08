@@ -18,33 +18,46 @@ import android.widget.ArrayAdapter;
 import com.example.maxpayne.mytodoapp.AddDialog;
 import com.example.maxpayne.mytodoapp.DetailTaskDialog;
 import com.example.maxpayne.mytodoapp.R;
+import com.example.maxpayne.mytodoapp.db.Database;
+import com.example.maxpayne.mytodoapp.db.DbContract;
 
 public class RVMainActivity extends AppCompatActivity implements AddDialog.NoticeDialogListener,
         DetailTaskDialog.NoticeDialogListener {
+    Database db;
     RecyclerView rv;
     CursorRecyclerViewAdapter cra;
     final int OPTIONS_MENU_ADD = 0;
     FloatingActionButton fab;
     Toolbar myTb;
 
+    private int selectionCode = 0;
+    private final int SELECTION_ALL_CODE = 0;
+    private final int SELECTION_INCOMPLETE_CODE = 1;
+    private final int SELECTION_COMPLETE_CODE = 2;
+    private final int SELECTION_CANCEL_CODE = 3;
+    private final int SELECTION_ARCHIVED_CODE = 4;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_rv);
 
+        db = new Database(this);
+
         rv = findViewById(R.id.rvList);
         myTb = findViewById(R.id.RvTb);
         fab = findViewById(R.id.RvFab);
 
-        cra = new CursorRecyclerViewAdapter(this, getSupportFragmentManager());
+        cra = new CursorRecyclerViewAdapter(this, db, getSupportFragmentManager());
+        db.addObserver(cra);
+
         myTb.setNavigationIcon(R.mipmap.icon_launcher);
         setSupportActionBar(myTb);
 
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(cra);
 
-        ItemTouchHelperCallback ithc = new ItemTouchHelperCallback(cra);
-        ItemTouchHelper touchHelper = new ItemTouchHelper(ithc);
+        ItemTouchHelper touchHelper = new ItemTouchHelper(new ItemTouchHelperCallback(cra));
         touchHelper.attachToRecyclerView(rv);
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -71,7 +84,24 @@ public class RVMainActivity extends AppCompatActivity implements AddDialog.Notic
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                cra.setSelectionCode(position);
+                selectionCode = position;
+                switch (selectionCode) {
+                    case SELECTION_ALL_CODE:
+                        cra.changeCursor(db.getAllTasks());
+                        break;
+                    case SELECTION_INCOMPLETE_CODE:
+                        cra.changeCursor(db.getTaskByState(DbContract.ToDoEntry.INCOMPLETE_CODE));
+                        break;
+                    case SELECTION_COMPLETE_CODE:
+                        cra.changeCursor(db.getTaskByState(DbContract.ToDoEntry.COMPLETE_CODE));
+                        break;
+                    case SELECTION_CANCEL_CODE:
+                        cra.changeCursor(db.getTaskByState(DbContract.ToDoEntry.CANCEL_CODE));
+                        break;
+                    case SELECTION_ARCHIVED_CODE:
+                        cra.changeCursor(db.getTaskByArchivedState(DbContract.ToDoEntry.ARCHIVED_CODE));
+                        break;
+                }
             }
 
             @Override
@@ -93,11 +123,11 @@ public class RVMainActivity extends AppCompatActivity implements AddDialog.Notic
 
     @Override
     public void onDialogPositiveClick(String taskName, String description) {
-        cra.addTask(taskName, description);
+        db.addTask(taskName, description);
     }
 
     @Override
     public void closeTask(int id) {
-        cra.completeTask(id);
+        db.completeTask(id);
     }
 }
