@@ -1,5 +1,8 @@
 package com.example.maxpayne.mytodoapp.recycler_view;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModel;
+import android.arch.lifecycle.ViewModelProvider;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -8,7 +11,7 @@ import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,14 +21,22 @@ import android.widget.ArrayAdapter;
 import com.example.maxpayne.mytodoapp.AddDialog;
 import com.example.maxpayne.mytodoapp.DetailTaskDialog;
 import com.example.maxpayne.mytodoapp.R;
+import com.example.maxpayne.mytodoapp.db.dao.Database;
+import com.example.maxpayne.mytodoapp.db.dao.Task;
+
+import java.util.List;
+import java.util.concurrent.Executor;
 
 public class RVMainActivity extends AppCompatActivity implements AddDialog.NoticeDialogListener,
         DetailTaskDialog.NoticeDialogListener {
     RecyclerView rv;
+    ListRecyclerViewAdapter lrva;
     CursorRecyclerViewAdapter cra;
     final int OPTIONS_MENU_ADD = 0;
     FloatingActionButton fab;
     Toolbar myTb;
+
+    Database roomDb;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -36,6 +47,7 @@ public class RVMainActivity extends AppCompatActivity implements AddDialog.Notic
         myTb = findViewById(R.id.RvTb);
         fab = findViewById(R.id.RvFab);
 
+        /*
         cra = new CursorRecyclerViewAdapter(this, getSupportFragmentManager());
         myTb.setNavigationIcon(R.mipmap.icon_launcher);
         setSupportActionBar(myTb);
@@ -45,7 +57,26 @@ public class RVMainActivity extends AppCompatActivity implements AddDialog.Notic
 
         ItemTouchHelperCallback ithc = new ItemTouchHelperCallback(cra);
         ItemTouchHelper touchHelper = new ItemTouchHelper(ithc);
-        touchHelper.attachToRecyclerView(rv);
+        touchHelper.attachToRecyclerView(rv);*/
+
+        lrva = new ListRecyclerViewAdapter();
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        rv.setAdapter(lrva);
+
+        roomDb = Database.getInstance(this);
+
+        TaskViewModel tvm = ViewModelProvider.AndroidViewModelFactory
+                .getInstance(getApplication()).create(TaskViewModel.class);
+
+        tvm.setDb(roomDb);
+        tvm.getTasks().observe(this, new Observer<List<Task>>() {
+            @Override
+            public void onChanged(@Nullable List<Task> tasks) {
+                lrva.setData(tasks);
+            }
+        });
+
+
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,7 +124,8 @@ public class RVMainActivity extends AppCompatActivity implements AddDialog.Notic
 
     @Override
     public void onDialogPositiveClick(String taskName, String description) {
-        cra.addTask(taskName, description);
+        //cra.addTask(taskName, description);
+        roomDb.taskDao().insert(new Task(taskName, description));
     }
 
     @Override
