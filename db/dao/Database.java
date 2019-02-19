@@ -22,6 +22,15 @@ public abstract class Database extends RoomDatabase {
             try {
                 database.beginTransaction();
 
+                //Dev device migration error correction
+                /*
+                database.execSQL("ALTER TABLE " + DbContract.ToDoEntry.TABLE_NAME +
+                        " RENAME TO " + DbContract.ToDoEntry.TABLE_NAME + _old);
+                database.execSQL(DbContract.ToDoEntry.SQL_CREATE_ENTRIES);
+                database.execSQL("INSERT INTO todo(_id,task,add_date,end_date,complete,description,archived) SELECT _id,task,add_date,end_date,complete,description,archivedINTEGER from todo_old;");
+                database.execSQL("DROP TABLE todo_old");*/
+
+
                 database.execSQL("UPDATE " + DbContract.ToDoEntry.TABLE_NAME +
                         " SET " + DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED + "=0" +
                         " WHERE " + DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED + " IS NULL");

@@ -35,8 +35,7 @@ public class RVMainActivity extends AppCompatActivity implements AddDialog.Notic
     final int OPTIONS_MENU_ADD = 0;
     FloatingActionButton fab;
     Toolbar myTb;
-
-    Database roomDb;
+    TaskViewModel tvm;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,19 +62,10 @@ public class RVMainActivity extends AppCompatActivity implements AddDialog.Notic
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(lrva);
 
-        roomDb = Database.getInstance(this);
-
-        TaskViewModel tvm = ViewModelProvider.AndroidViewModelFactory
+        tvm = ViewModelProvider.AndroidViewModelFactory
                 .getInstance(getApplication()).create(TaskViewModel.class);
 
-        tvm.setDb(roomDb);
-        tvm.getTasks().observe(this, new Observer<List<Task>>() {
-            @Override
-            public void onChanged(@Nullable List<Task> tasks) {
-                lrva.setData(tasks);
-            }
-        });
-
+        tvm.getTasks().observe(this, (tasks) -> lrva.setData(tasks));
 
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -125,7 +115,7 @@ public class RVMainActivity extends AppCompatActivity implements AddDialog.Notic
     @Override
     public void onDialogPositiveClick(String taskName, String description) {
         //cra.addTask(taskName, description);
-        roomDb.taskDao().insert(new Task(taskName, description));
+        tvm.addTask(new Task(taskName, description));
     }
 
     @Override
