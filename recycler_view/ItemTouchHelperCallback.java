@@ -5,9 +5,9 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
 public class ItemTouchHelperCallback extends ItemTouchHelper.SimpleCallback {
-    private  CursorRecyclerViewAdapter adapter;
+    private  ListRecyclerViewAdapter adapter;
 
-    public ItemTouchHelperCallback(CursorRecyclerViewAdapter adapter) {
+    public ItemTouchHelperCallback(ListRecyclerViewAdapter adapter) {
         super(0, ItemTouchHelper.LEFT);
         this.adapter = adapter;
     }

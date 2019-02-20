@@ -1,7 +1,5 @@
 package com.example.maxpayne.mytodoapp.recycler_view;
 
-import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProvider;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,7 +9,7 @@ import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,17 +19,14 @@ import android.widget.ArrayAdapter;
 import com.example.maxpayne.mytodoapp.AddDialog;
 import com.example.maxpayne.mytodoapp.DetailTaskDialog;
 import com.example.maxpayne.mytodoapp.R;
-import com.example.maxpayne.mytodoapp.db.dao.Database;
+import com.example.maxpayne.mytodoapp.db.DbContract;
 import com.example.maxpayne.mytodoapp.db.dao.Task;
 
-import java.util.List;
-import java.util.concurrent.Executor;
-
-public class RVMainActivity extends AppCompatActivity implements AddDialog.NoticeDialogListener,
-        DetailTaskDialog.NoticeDialogListener {
+public class MainActivity extends AppCompatActivity implements AddDialog.NoticeDialogListener,
+        DetailTaskDialog.NoticeDialogListener, ListRecyclerViewAdapter.dbWorkListener {
     RecyclerView rv;
     ListRecyclerViewAdapter lrva;
-    CursorRecyclerViewAdapter cra;
+    //CursorRecyclerViewAdapter cra;
     final int OPTIONS_MENU_ADD = 0;
     FloatingActionButton fab;
     Toolbar myTb;
@@ -41,26 +36,14 @@ public class RVMainActivity extends AppCompatActivity implements AddDialog.Notic
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_rv);
+        initViews();
 
-        rv = findViewById(R.id.rvList);
-        myTb = findViewById(R.id.RvTb);
-        fab = findViewById(R.id.RvFab);
-
-        /*
-        cra = new CursorRecyclerViewAdapter(this, getSupportFragmentManager());
         myTb.setNavigationIcon(R.mipmap.icon_launcher);
         setSupportActionBar(myTb);
 
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(cra);
-
-        ItemTouchHelperCallback ithc = new ItemTouchHelperCallback(cra);
+        ItemTouchHelperCallback ithc = new ItemTouchHelperCallback(lrva);
         ItemTouchHelper touchHelper = new ItemTouchHelper(ithc);
-        touchHelper.attachToRecyclerView(rv);*/
-
-        lrva = new ListRecyclerViewAdapter();
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setAdapter(lrva);
+        touchHelper.attachToRecyclerView(rv);
 
         tvm = ViewModelProvider.AndroidViewModelFactory
                 .getInstance(getApplication()).create(TaskViewModel.class);
@@ -68,12 +51,7 @@ public class RVMainActivity extends AppCompatActivity implements AddDialog.Notic
         tvm.getTasks().observe(this, (tasks) -> lrva.setData(tasks));
 
 
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                openAddingDialog();
-            }
-        });
+        fab.setOnClickListener((view -> openAddingDialog()));
     }
 
     public void openAddingDialog() {
@@ -92,7 +70,8 @@ public class RVMainActivity extends AppCompatActivity implements AddDialog.Notic
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                cra.setSelectionCode(position);
+                //TODO:
+                //cra.setSelectionCode(position);
             }
 
             @Override
@@ -103,23 +82,34 @@ public class RVMainActivity extends AppCompatActivity implements AddDialog.Notic
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case OPTIONS_MENU_ADD:
-                openAddingDialog();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public void onDialogPositiveClick(String taskName, String description) {
-        //cra.addTask(taskName, description);
         tvm.addTask(new Task(taskName, description));
     }
 
     @Override
-    public void closeTask(int id) {
-        cra.completeTask(id);
+    public void closeTask(Task task) {
+        task.end_date = System.currentTimeMillis();
+        task.complete = DbContract.ToDoEntry.COMPLETE_CODE;
+        tvm.updateTask(task);
+    }
+
+    void initViews() {
+        rv = findViewById(R.id.rvList);
+        myTb = findViewById(R.id.RvTb);
+        fab = findViewById(R.id.RvFab);
+
+        lrva = new ListRecyclerViewAdapter(this, getSupportFragmentManager());
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        rv.setAdapter(lrva);
+    }
+
+    @Override
+    public void deleteTask(Task task) {
+        tvm.deleteTask(task);
+    }
+
+    @Override
+    public void updateTask(Task task) {
+        tvm.updateTask(task);
     }
 }

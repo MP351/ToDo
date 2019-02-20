@@ -12,16 +12,14 @@ import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.maxpayne.mytodoapp.db.dao.Task;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
 public class DetailTaskDialog extends DialogFragment {
-    int _id;
-    long addDate;
-    long endDate;
-    String taskHead;
-    String taskDescription;
+    Task task;
     private TextView tvTask;
     private TextView tvAddDate;
     private TextView tvEndDate;
@@ -37,34 +35,13 @@ public class DetailTaskDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setMessage(R.string.detail_head)
                 .setView(view)
-                .setNeutralButton(R.string.close, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
+                .setNeutralButton(R.string.close, (dialogInterface, i) -> dismiss());
 
         return builder.create();
     }
 
-    public void set_id(int _id) {
-        this._id = _id;
-    }
-
-    public void setAddDate(long addDate) {
-        this.addDate = addDate;
-    }
-
-    public void setEndDate(long endDate) {
-        this.endDate = endDate;
-    }
-
-    public void setTaskHead(String taskHead) {
-        this.taskHead = taskHead;
-    }
-
-    public void setTaskDescription(String taskDescription) {
-        this.taskDescription = taskDescription;
+    public void setTask(Task task) {
+        this.task = task;
     }
 
     private void prepareDialog() {
@@ -74,26 +51,23 @@ public class DetailTaskDialog extends DialogFragment {
         tvEndDate = view.findViewById(R.id.tvEndDate);
         tvDescription = view.findViewById(R.id.tvDescription);
 
-        tvTask.setText(taskHead);
-        tvDescription.setText(taskDescription);
+        tvTask.setText(task.task);
+        tvDescription.setText(task.description);
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.getDefault());
-        tvAddDate.setText(sdf.format(new Date(addDate)));
-        if (endDate > 0) {
-            tvEndDate.setText(sdf.format(new Date(endDate)));
+        tvAddDate.setText(sdf.format(new Date(task.add_date)));
+        if (task.end_date != null) {
+            tvEndDate.setText(sdf.format(new Date(task.end_date)));
             tvEndDate.setTextColor(Color.BLACK);
         } else {
             tvEndDate.setText(R.string.close_task);
             tvEndDate.setTextColor(Color.BLUE);
         }
 
-        tvEndDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mListener.closeTask(_id);
+        tvEndDate.setOnClickListener(view -> {
+                mListener.closeTask(task);
                 dismiss();
-            }
-        });
+            });
     }
 
     @Override
@@ -109,6 +83,6 @@ public class DetailTaskDialog extends DialogFragment {
     }
 
     public interface NoticeDialogListener {
-        void closeTask(int id);
+        void closeTask(Task task);
     }
 }

@@ -20,17 +20,22 @@ public interface TaskDao {
             " AND " +
             DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED + " <> " + DbContract.ToDoEntry.ARCHIVED_CODE);
 
-    @Query(GET_All_SQL)
-    List<Task> getAllAsList();
+    String GET_NOT_ARCHIVED = "SELECT * FROM " + DbContract.ToDoEntry.TABLE_NAME + " WHERE " +
+            DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED + " + " + DbContract.ToDoEntry.NOT_ARCHIVED_CODE +
+            " AND " +
+            DbContract.ToDoEntry.COLUMN_NAME_COMPLETE + " = :completeCode";
 
-    @Query(GET_All_SQL)
-    LiveData<List<Task>> getAllAsLiveData();
-/*
-    @Query(GET_All_SQL)
-    <T> T getAll(Class<T> returnType);
+    String GET_ARCHIVED = "SELECT * FROM " + DbContract.ToDoEntry.TABLE_NAME + " WHERE " +
+            DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED + " + " + DbContract.ToDoEntry.ARCHIVED_CODE;
 
     @Query(GET_ACTIVE_SQL)
-    <T> T getActive(Class<T> returnType);*/
+    LiveData<List<Task>> getAllAsLiveData();
+
+    @Query(GET_NOT_ARCHIVED)
+    LiveData<List<Task>> getByCompleteCode(int completeCode);
+
+    @Query(GET_ARCHIVED)
+    LiveData<List<Task>> getArchived();
 
     @Insert
     void insert(Task task);
@@ -40,6 +45,4 @@ public interface TaskDao {
 
     @Delete
     void delete(Task task);
-
-
 }

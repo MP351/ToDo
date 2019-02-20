@@ -9,6 +9,11 @@ import java.util.List;
 public class TaskRepository{
     private Database db;
 
+    private final int INSERT_CODE = 0;
+    private final int DELETE_CODE = 1;
+    private final int UPDATE_CODE = 2;
+
+
     public TaskRepository(Application application) {
         db = Database.getInstance(application);
     }
@@ -18,19 +23,40 @@ public class TaskRepository{
     }
 
     public void addTask(Task task) {
-        new insertAsyncTask(db.taskDao()).execute(task);
+        new asyncDbTask(db.taskDao(), INSERT_CODE).execute(task);
     }
 
-    private static class insertAsyncTask extends AsyncTask<Task, Void, Void> {
-        private TaskDao taskDao;
+    public void deleteTask(Task task) {
+        new asyncDbTask(db.taskDao(), DELETE_CODE).execute(task);
+    }
 
-        insertAsyncTask(TaskDao taskDao) {
+    public void updateTask(Task task) {
+        new asyncDbTask(db.taskDao(), UPDATE_CODE).execute(task);
+    }
+
+    private static class asyncDbTask extends AsyncTask<Task, Void, Void> {
+        private TaskDao taskDao;
+        private int code;
+
+        asyncDbTask(TaskDao taskDao, int operCode) {
             this.taskDao = taskDao;
+            this.code = operCode;
         }
 
         @Override
         protected Void doInBackground(Task... tasks) {
-            taskDao.insert(tasks[0]);
+            switch (code) {
+                case 0:
+                    taskDao.insert(tasks[0]);
+                    break;
+                case 1:
+                    taskDao.delete(tasks[0]);
+                    break;
+                case 2:
+                    taskDao.update(tasks[0]);
+                    break;
+            }
+
             return null;
         }
     }
