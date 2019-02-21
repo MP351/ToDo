@@ -22,6 +22,10 @@ public class TaskRepository{
         return db.taskDao().getAllAsLiveData();
     }
 
+    public LiveData<List<Task>> getTasks(int archiveCode, int completeCode) {
+        return db.taskDao().getTasks(archiveCode, completeCode);
+    }
+
     public void addTask(Task task) {
         new asyncDbTask(db.taskDao(), INSERT_CODE).execute(task);
     }

@@ -26,8 +26,6 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
         DetailTaskDialog.NoticeDialogListener, ListRecyclerViewAdapter.dbWorkListener {
     RecyclerView rv;
     ListRecyclerViewAdapter lrva;
-    //CursorRecyclerViewAdapter cra;
-    final int OPTIONS_MENU_ADD = 0;
     FloatingActionButton fab;
     Toolbar myTb;
     TaskViewModel tvm;
@@ -71,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 //TODO:
-                //cra.setSelectionCode(position);
+                lrva.setSelection(position);
             }
 
             @Override

@@ -12,10 +12,12 @@ import com.example.maxpayne.mytodoapp.R;
 import com.example.maxpayne.mytodoapp.db.DbContract;
 import com.example.maxpayne.mytodoapp.db.dao.Task;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder> implements ItemTouchHelperAdapter {
-    List<Task> data;
+    List<Task> data = new ArrayList<>();
+    List<Task> cache = new ArrayList<>();
     Activity activity;
     FragmentManager fm;
     dbWorkListener mListener;
@@ -41,6 +43,7 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewHolder recyclerViewHolder, int i) {
         Task task = data.get(i);
+
         recyclerViewHolder.tvNumber.setText(String.valueOf(task._id));
         recyclerViewHolder.chtvTask.setText(task.task);
         recyclerViewHolder.chtvTask.setChecked(task.complete == DbContract.ToDoEntry.COMPLETE_CODE);
@@ -52,6 +55,8 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
         });
     }
 
+
+
     @Override
     public int getItemCount() {
         if (data == null)
@@ -60,7 +65,8 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
     }
 
     public void setData(List<Task> data) {
-        this.data = data;
+        this.cache = data;
+        setSelection(0);
         notifyDataSetChanged();
     }
 
@@ -80,6 +86,40 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
                     break;
             }
         }
+    }
+
+    void setSelection(int selection) {
+        ArrayList<Task> selected = new ArrayList<>();
+
+        for (Task task : cache) {
+            switch (selection) {
+                case 0:
+                    selected.add(task);
+                    break;
+                case 1:
+                    if (task.archived != DbContract.ToDoEntry.ARCHIVED_CODE &&
+                        task.complete == DbContract.ToDoEntry.INCOMPLETE_CODE)
+                        selected.add(task);
+                    break;
+                case 2:
+                    if (task.archived != DbContract.ToDoEntry.ARCHIVED_CODE &&
+                    task.complete == DbContract.ToDoEntry.COMPLETE_CODE)
+                        selected.add(task);
+                    break;
+                case 3:
+                    if (task.archived != DbContract.ToDoEntry.ARCHIVED_CODE &&
+                    task.complete == DbContract.ToDoEntry.CANCEL_CODE)
+                        selected.add(task);
+                    break;
+                case 4:
+                    if (task.archived == DbContract.ToDoEntry.ARCHIVED_CODE)
+                        selected.add(task);
+                    break;
+            }
+        }
+
+        data = selected;
+        notifyDataSetChanged();
     }
 
     public interface dbWorkListener {

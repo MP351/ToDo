@@ -28,11 +28,15 @@ public interface TaskDao {
     String GET_ARCHIVED = "SELECT * FROM " + DbContract.ToDoEntry.TABLE_NAME + " WHERE " +
             DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED + " + " + DbContract.ToDoEntry.ARCHIVED_CODE;
 
-    @Query(GET_ACTIVE_SQL)
+    String GET_TEMPLATE = "SELECT * FROM " + DbContract.ToDoEntry.TABLE_NAME + " WHERE " +
+            DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED + " = :archivedCode AND " +
+            DbContract.ToDoEntry.COLUMN_NAME_COMPLETE + " = :completeCode";
+
+    @Query(GET_All_SQL)
     LiveData<List<Task>> getAllAsLiveData();
 
-    @Query(GET_NOT_ARCHIVED)
-    LiveData<List<Task>> getByCompleteCode(int completeCode);
+    @Query(GET_TEMPLATE)
+    LiveData<List<Task>> getTasks(int archivedCode, int completeCode);
 
     @Query(GET_ARCHIVED)
     LiveData<List<Task>> getArchived();
