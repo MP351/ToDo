@@ -6,6 +6,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 
 public class ItemTouchHelperCallback extends ItemTouchHelper.SimpleCallback {
     private  ListRecyclerViewAdapter adapter;
+    private boolean swipeEnabled;
 
     public ItemTouchHelperCallback(ListRecyclerViewAdapter adapter) {
         super(0, ItemTouchHelper.LEFT);
@@ -25,5 +26,14 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.SimpleCallback {
     @Override
     public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
         return super.getMovementFlags(recyclerView, viewHolder);
+    }
+
+    @Override
+    public boolean isItemViewSwipeEnabled() {
+        return swipeEnabled;
+    }
+
+    public void setSwipeEnabled(boolean swipeEnabled) {
+        this.swipeEnabled = swipeEnabled;
     }
 }

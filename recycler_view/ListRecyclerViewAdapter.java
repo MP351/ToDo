@@ -20,14 +20,16 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
     List<Task> cache = new ArrayList<>();
     Activity activity;
     FragmentManager fm;
-    dbWorkListener mListener;
+    dbWorkListener mDbWorkListener;
+    swipeListener mSwipeListener;
 
     public ListRecyclerViewAdapter(Activity activity, FragmentManager fm) {
         this.activity = activity;
         this.fm = fm;
 
         try {
-            mListener = (dbWorkListener) activity;
+            mDbWorkListener = (dbWorkListener) activity;
+            mSwipeListener = (swipeListener) activity;
         } catch (ClassCastException e) {
             e.printStackTrace();
         }
@@ -78,15 +80,18 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
             switch (task.complete) {
                 case DbContract.ToDoEntry.INCOMPLETE_CODE:
                     task.complete = DbContract.ToDoEntry.CANCEL_CODE;
-                    mListener.updateTask(task);
+                    mDbWorkListener.updateTask(task);
                     break;
                 case DbContract.ToDoEntry.COMPLETE_CODE:
                     task.archived = DbContract.ToDoEntry.ARCHIVED_CODE;
-                    mListener.updateTask(task);
+                    mDbWorkListener.updateTask(task);
                     break;
             }
         }
+        notifyItemChanged(position);
     }
+
+
 
     void setSelection(int selection) {
         ArrayList<Task> selected = new ArrayList<>();
@@ -94,24 +99,31 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
         for (Task task : cache) {
             switch (selection) {
                 case 0:
-                    selected.add(task);
+                    mSwipeListener.setSwapEnable(true);
+                    if (task.archived != DbContract.ToDoEntry.ARCHIVED_CODE &&
+                        task.complete != DbContract.ToDoEntry.CANCEL_CODE)
+                        selected.add(task);
                     break;
                 case 1:
+                    mSwipeListener.setSwapEnable(true);
                     if (task.archived != DbContract.ToDoEntry.ARCHIVED_CODE &&
                         task.complete == DbContract.ToDoEntry.INCOMPLETE_CODE)
                         selected.add(task);
                     break;
                 case 2:
+                    mSwipeListener.setSwapEnable(true);
                     if (task.archived != DbContract.ToDoEntry.ARCHIVED_CODE &&
                     task.complete == DbContract.ToDoEntry.COMPLETE_CODE)
                         selected.add(task);
                     break;
                 case 3:
+                    mSwipeListener.setSwapEnable(false);
                     if (task.archived != DbContract.ToDoEntry.ARCHIVED_CODE &&
                     task.complete == DbContract.ToDoEntry.CANCEL_CODE)
                         selected.add(task);
                     break;
                 case 4:
+                    mSwipeListener.setSwapEnable(false);
                     if (task.archived == DbContract.ToDoEntry.ARCHIVED_CODE)
                         selected.add(task);
                     break;
@@ -125,5 +137,9 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
     public interface dbWorkListener {
         void deleteTask(Task task);
         void updateTask(Task task);
+    }
+
+    public interface swipeListener{
+        void setSwapEnable(boolean enabled);
     }
 }

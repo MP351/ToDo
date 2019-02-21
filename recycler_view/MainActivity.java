@@ -23,12 +23,13 @@ import com.example.maxpayne.mytodoapp.db.DbContract;
 import com.example.maxpayne.mytodoapp.db.dao.Task;
 
 public class MainActivity extends AppCompatActivity implements AddDialog.NoticeDialogListener,
-        DetailTaskDialog.NoticeDialogListener, ListRecyclerViewAdapter.dbWorkListener {
+        DetailTaskDialog.NoticeDialogListener, ListRecyclerViewAdapter.dbWorkListener, ListRecyclerViewAdapter.swipeListener {
     RecyclerView rv;
     ListRecyclerViewAdapter lrva;
     FloatingActionButton fab;
     Toolbar myTb;
     TaskViewModel tvm;
+    ItemTouchHelperCallback ithc;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
         myTb.setNavigationIcon(R.mipmap.icon_launcher);
         setSupportActionBar(myTb);
 
-        ItemTouchHelperCallback ithc = new ItemTouchHelperCallback(lrva);
+        ithc = new ItemTouchHelperCallback(lrva);
         ItemTouchHelper touchHelper = new ItemTouchHelper(ithc);
         touchHelper.attachToRecyclerView(rv);
 
@@ -109,5 +110,10 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
     @Override
     public void updateTask(Task task) {
         tvm.updateTask(task);
+    }
+
+    @Override
+    public void setSwapEnable(boolean enabled) {
+        ithc.setSwipeEnabled(enabled);
     }
 }
