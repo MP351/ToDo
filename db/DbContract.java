@@ -25,13 +25,13 @@ public class DbContract {
 
         public static final String SQL_CREATE_ENTRIES = "CREATE TABLE IF NOT EXISTS " +
                 TABLE_NAME + "(" +
-                _ID + " INTEGER PRIMARY KEY," +
+                _ID + " INTEGER PRIMARY KEY NOT NULL," +
                 COLUMN_NAME_TASK + " TEXT," +
-                COLUMN_NAME_ADD_DATE + " INTEGER," +
+                COLUMN_NAME_ADD_DATE + " INTEGER NOT NULL," +
                 COLUMN_NAME_END_DATE + " INTEGER," +
-                COLUMN_NAME_COMPLETE + " INTEGER," +
+                COLUMN_NAME_COMPLETE + " INTEGER NOT NULL," +
                 COLUMN_NAME_DESCRIPTION + " TEXT," +
-                COLUMN_NAME_ARCHIVED + " INTEGER" + ")";
+                COLUMN_NAME_ARCHIVED + " INTEGER NOT NULL" + ")";
 
         public static final String SQL_DELETE_ENTRIES = "DROP TABLE IF EXISTS " +
                 TABLE_NAME;

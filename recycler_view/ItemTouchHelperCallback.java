@@ -5,9 +5,10 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
 public class ItemTouchHelperCallback extends ItemTouchHelper.SimpleCallback {
-    private  CursorRecyclerViewAdapter adapter;
+    private  ListRecyclerViewAdapter adapter;
+    private boolean swipeEnabled;
 
-    public ItemTouchHelperCallback(CursorRecyclerViewAdapter adapter) {
+    public ItemTouchHelperCallback(ListRecyclerViewAdapter adapter) {
         super(0, ItemTouchHelper.LEFT);
         this.adapter = adapter;
     }
@@ -20,5 +21,19 @@ public class ItemTouchHelperCallback extends ItemTouchHelper.SimpleCallback {
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int i) {
         adapter.onLeftSwipe(viewHolder.getAdapterPosition());
+    }
+
+    @Override
+    public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+        return super.getMovementFlags(recyclerView, viewHolder);
+    }
+
+    @Override
+    public boolean isItemViewSwipeEnabled() {
+        return swipeEnabled;
+    }
+
+    public void setSwipeEnabled(boolean swipeEnabled) {
+        this.swipeEnabled = swipeEnabled;
     }
 }
