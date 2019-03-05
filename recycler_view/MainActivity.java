@@ -3,7 +3,9 @@ package com.example.maxpayne.mytodoapp.recycler_view;
 import android.arch.lifecycle.ViewModelProvider;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
@@ -22,6 +24,8 @@ import com.example.maxpayne.mytodoapp.R;
 import com.example.maxpayne.mytodoapp.db.DbContract;
 import com.example.maxpayne.mytodoapp.db.dao.Task;
 
+import java.util.concurrent.ScheduledFuture;
+
 public class MainActivity extends AppCompatActivity implements AddDialog.NoticeDialogListener,
         DetailTaskDialog.NoticeDialogListener, ListRecyclerViewAdapter.dbWorkListener, ListRecyclerViewAdapter.swipeListener {
     RecyclerView rv;
@@ -30,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
     Toolbar myTb;
     TaskViewModel tvm;
     ItemTouchHelperCallback ithc;
+    ConstraintLayout cl;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -96,6 +101,7 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
         rv = findViewById(R.id.rvList);
         myTb = findViewById(R.id.RvTb);
         fab = findViewById(R.id.RvFab);
+        cl = findViewById(R.id.cl_main);
 
         lrva = new ListRecyclerViewAdapter(this, getSupportFragmentManager());
         rv.setLayoutManager(new LinearLayoutManager(this));
@@ -110,6 +116,34 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
     @Override
     public void updateTask(Task task) {
         tvm.updateTask(task);
+    }
+
+    @Override
+    public void archiveOrCancelTask(Task task, int code) {
+        StringBuilder sb = new StringBuilder("Task ");
+        Snackbar snb;
+        if (code == lrva.ACTION_CODE_CANCEL) {
+            snb = Snackbar.make(cl, sb.append(" cancelled.").toString(), Snackbar.LENGTH_SHORT);
+            snb.setDuration(3000);
+            updateTask(task);
+        } else {
+            snb = Snackbar.make(cl, sb.append(" archived.").toString(), Snackbar.LENGTH_SHORT);
+            snb.setDuration(3000);
+            updateTask(task);
+        }
+
+
+        snb.setAction("UNDO", (view -> {
+            if (code == lrva.ACTION_CODE_CANCEL) {
+                task.complete = DbContract.ToDoEntry.INCOMPLETE_CODE;
+                updateTask(task);
+            } else {
+                task.archived = DbContract.ToDoEntry.NOT_ARCHIVED_CODE;
+                updateTask(task);
+            }
+            lrva.notifyDataSetChanged();
+        }));
+        snb.show();
     }
 
     @Override

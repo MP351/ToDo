@@ -16,15 +16,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder> implements ItemTouchHelperAdapter {
-    List<Task> data = new ArrayList<>();
-    List<Task> cache = new ArrayList<>();
-    Activity activity;
-    FragmentManager fm;
-    dbWorkListener mDbWorkListener;
-    swipeListener mSwipeListener;
+    private List<Task> data = new ArrayList<>();
+    private List<Task> cache = new ArrayList<>();
+    private FragmentManager fm;
+    private dbWorkListener mDbWorkListener;
+    private swipeListener mSwipeListener;
 
-    public ListRecyclerViewAdapter(Activity activity, FragmentManager fm) {
-        this.activity = activity;
+    final int ACTION_CODE_CANCEL = 0;
+    final int ACTION_CODE_TO_ARCHIVE = 1;
+
+    ListRecyclerViewAdapter(Activity activity, FragmentManager fm) {
         this.fm = fm;
 
         try {
@@ -57,8 +58,6 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
         });
     }
 
-
-
     @Override
     public int getItemCount() {
         if (data == null)
@@ -66,7 +65,7 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
         return data.size();
     }
 
-    public void setData(List<Task> data) {
+    void setData(List<Task> data) {
         this.cache = data;
         setSelection(0);
         notifyDataSetChanged();
@@ -80,11 +79,13 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
             switch (task.complete) {
                 case DbContract.ToDoEntry.INCOMPLETE_CODE:
                     task.complete = DbContract.ToDoEntry.CANCEL_CODE;
-                    mDbWorkListener.updateTask(task);
+                    mDbWorkListener.archiveOrCancelTask(task, ACTION_CODE_CANCEL);
+                    data.remove(task);
                     break;
                 case DbContract.ToDoEntry.COMPLETE_CODE:
                     task.archived = DbContract.ToDoEntry.ARCHIVED_CODE;
-                    mDbWorkListener.updateTask(task);
+                    mDbWorkListener.archiveOrCancelTask(task, ACTION_CODE_TO_ARCHIVE);
+                    data.remove(task);
                     break;
             }
         }
@@ -137,6 +138,7 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
     public interface dbWorkListener {
         void deleteTask(Task task);
         void updateTask(Task task);
+        void archiveOrCancelTask(Task task, int CODE);
     }
 
     public interface swipeListener{

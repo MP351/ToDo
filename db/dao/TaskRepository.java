@@ -4,10 +4,19 @@ import android.app.Application;
 import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
 
+import com.example.maxpayne.mytodoapp.db.DbContract;
+
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class TaskRepository{
     private Database db;
+    private ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
 
     private final int INSERT_CODE = 0;
     private final int DELETE_CODE = 1;

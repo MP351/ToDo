@@ -43,6 +43,17 @@ public class Task {
         this.archived = DbContract.ToDoEntry.NOT_ARCHIVED_CODE;
     }
 
+    @Ignore
+    public Task(Task task) {
+        this._id = task._id;
+        this.task = task.task;
+        this.add_date = task.add_date;
+        this.end_date = task.end_date;
+        this.complete = task.complete;
+        this.description = task.description;
+        this.archived = task.archived;
+    }
+
     @NonNull
     @PrimaryKey
     @ColumnInfo(name = DbContract.ToDoEntry._ID)
