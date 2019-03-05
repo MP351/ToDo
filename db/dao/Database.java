@@ -9,13 +9,13 @@ import android.support.annotation.NonNull;
 
 import com.example.maxpayne.mytodoapp.db.DbContract;
 
-@android.arch.persistence.room.Database(entities = {Task.class}, version = 3)
+@android.arch.persistence.room.Database(entities = {Task.class}, version = DbContract.DB_VERSION)
 public abstract class Database extends RoomDatabase {
     private static Database INSTANCE;
     public abstract TaskDao taskDao();
 
 
-    static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+    private static final Migration MIGRATION_2_3 = new Migration(2, 3) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             final String _old = "_old";

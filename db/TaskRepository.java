@@ -1,10 +1,13 @@
-package com.example.maxpayne.mytodoapp.db.dao;
+package com.example.maxpayne.mytodoapp.db;
 
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
 import android.os.AsyncTask;
 
 import com.example.maxpayne.mytodoapp.db.DbContract;
+import com.example.maxpayne.mytodoapp.db.dao.Database;
+import com.example.maxpayne.mytodoapp.db.dao.Task;
+import com.example.maxpayne.mytodoapp.db.dao.TaskDao;
 
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -16,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 public class TaskRepository{
     private Database db;
-    private ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
 
     private final int INSERT_CODE = 0;
     private final int DELETE_CODE = 1;

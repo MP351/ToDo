@@ -1,4 +1,4 @@
-package com.example.maxpayne.mytodoapp;
+package com.example.maxpayne.mytodoapp.ui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -12,6 +12,7 @@ import android.support.v4.app.DialogFragment;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.maxpayne.mytodoapp.R;
 import com.example.maxpayne.mytodoapp.db.dao.Task;
 
 import java.text.SimpleDateFormat;

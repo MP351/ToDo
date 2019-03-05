@@ -3,7 +3,7 @@ package com.example.maxpayne.mytodoapp.db;
 import android.provider.BaseColumns;
 
 public class DbContract {
-    public static final int DB_VERSION = 2;
+    public static final int DB_VERSION = 3;
     public static final String DB_NAME = "database.db";
 
     public static class ToDoEntry implements BaseColumns {

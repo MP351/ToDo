@@ -1,4 +1,4 @@
-package com.example.maxpayne.mytodoapp.recycler_view;
+package com.example.maxpayne.mytodoapp.ui;
 
 import android.arch.lifecycle.ViewModelProvider;
 import android.os.Bundle;
@@ -13,18 +13,18 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 
-import com.example.maxpayne.mytodoapp.AddDialog;
-import com.example.maxpayne.mytodoapp.DetailTaskDialog;
+import com.example.maxpayne.mytodoapp.recycler_view.ItemTouchHelperCallback;
+import com.example.maxpayne.mytodoapp.recycler_view.ListRecyclerViewAdapter;
+import com.example.maxpayne.mytodoapp.recycler_view.TaskViewModel;
+import com.example.maxpayne.mytodoapp.ui.AddDialog;
+import com.example.maxpayne.mytodoapp.ui.DetailTaskDialog;
 import com.example.maxpayne.mytodoapp.R;
 import com.example.maxpayne.mytodoapp.db.DbContract;
 import com.example.maxpayne.mytodoapp.db.dao.Task;
-
-import java.util.concurrent.ScheduledFuture;
 
 public class MainActivity extends AppCompatActivity implements AddDialog.NoticeDialogListener,
         DetailTaskDialog.NoticeDialogListener, ListRecyclerViewAdapter.dbWorkListener, ListRecyclerViewAdapter.swipeListener {

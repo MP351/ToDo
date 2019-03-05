@@ -7,7 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.example.maxpayne.mytodoapp.DetailTaskDialog;
+import com.example.maxpayne.mytodoapp.ui.DetailTaskDialog;
 import com.example.maxpayne.mytodoapp.R;
 import com.example.maxpayne.mytodoapp.db.DbContract;
 import com.example.maxpayne.mytodoapp.db.dao.Task;
@@ -22,10 +22,10 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
     private dbWorkListener mDbWorkListener;
     private swipeListener mSwipeListener;
 
-    final int ACTION_CODE_CANCEL = 0;
-    final int ACTION_CODE_TO_ARCHIVE = 1;
+    public final int ACTION_CODE_CANCEL = 0;
+    public final int ACTION_CODE_TO_ARCHIVE = 1;
 
-    ListRecyclerViewAdapter(Activity activity, FragmentManager fm) {
+    public ListRecyclerViewAdapter(Activity activity, FragmentManager fm) {
         this.fm = fm;
 
         try {
@@ -65,7 +65,7 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
         return data.size();
     }
 
-    void setData(List<Task> data) {
+    public void setData(List<Task> data) {
         this.cache = data;
         setSelection(0);
         notifyDataSetChanged();
@@ -94,7 +94,7 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
 
 
 
-    void setSelection(int selection) {
+    public void setSelection(int selection) {
         ArrayList<Task> selected = new ArrayList<>();
 
         for (Task task : cache) {

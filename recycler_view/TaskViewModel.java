@@ -3,16 +3,12 @@ package com.example.maxpayne.mytodoapp.recycler_view;
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.ViewModel;
 import android.support.annotation.NonNull;
 
-import com.example.maxpayne.mytodoapp.db.dao.Database;
 import com.example.maxpayne.mytodoapp.db.dao.Task;
-import com.example.maxpayne.mytodoapp.db.dao.TaskRepository;
+import com.example.maxpayne.mytodoapp.db.TaskRepository;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ScheduledFuture;
 
 public class TaskViewModel extends AndroidViewModel {
     private LiveData<List<Task>> tasks;
