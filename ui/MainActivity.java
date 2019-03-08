@@ -1,5 +1,7 @@
 package com.example.maxpayne.mytodoapp.ui;
 
+import android.app.Activity;
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProvider;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -26,8 +28,10 @@ import com.example.maxpayne.mytodoapp.R;
 import com.example.maxpayne.mytodoapp.db.DbContract;
 import com.example.maxpayne.mytodoapp.db.dao.Task;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements AddDialog.NoticeDialogListener,
-        DetailTaskDialog.NoticeDialogListener, ListRecyclerViewAdapter.dbWorkListener, ListRecyclerViewAdapter.swipeListener {
+        DetailTaskDialog.NoticeDialogListener, ListRecyclerViewAdapter.dbWorkListener {
     RecyclerView rv;
     ListRecyclerViewAdapter lrva;
     FloatingActionButton fab;
@@ -35,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
     TaskViewModel tvm;
     ItemTouchHelperCallback ithc;
     ConstraintLayout cl;
+    AppCompatActivity activity = this;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,8 +79,35 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                //TODO:
-                lrva.setSelection(position);
+                tvm.getTasks().removeObservers(activity);
+                switch (position) {
+                    //Active
+                    case 0:
+                        ithc.setSwipeEnabled(true);
+                        tvm.queryActive();
+                        break;
+                    //Incomplete
+                    case 1:
+                        ithc.setSwipeEnabled(true);
+                        tvm.queryIncomplete();
+                        break;
+                    //Complete
+                    case 2:
+                        ithc.setSwipeEnabled(true);
+                        tvm.queryComplete();
+                        break;
+                    //Cancelled
+                    case 3:
+                        ithc.setSwipeEnabled(false);
+                        tvm.queryCancelled();
+                        break;
+                    //Archived
+                    case 4:
+                        ithc.setSwipeEnabled(false);
+                        tvm.queryArchived();
+                        break;
+                }
+                tvm.getTasks().observe(activity, (tasks) -> lrva.setData(tasks));
             }
 
             @Override
@@ -144,10 +176,5 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
             lrva.notifyDataSetChanged();
         }));
         snb.show();
-    }
-
-    @Override
-    public void setSwapEnable(boolean enabled) {
-        ithc.setSwipeEnabled(enabled);
     }
 }
