@@ -124,12 +124,14 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
 
     @Override
     public void closeTask(Task task) {
-        task.end_date = System.currentTimeMillis();
-        task.complete = DbContract.ToDoEntry.COMPLETE_CODE;
-        tvm.updateTask(task);
+        Task task1 = new Task(task._id, task.task, task.add_date, task.end_date,
+                task.complete, task.description, task.archived);
+        task1.end_date = System.currentTimeMillis();
+        task1.complete = DbContract.ToDoEntry.COMPLETE_CODE;
+        tvm.updateTask(task1);
     }
 
-    void initViews() {
+    private void initViews() {
         rv = findViewById(R.id.rvList);
         myTb = findViewById(R.id.RvTb);
         fab = findViewById(R.id.RvFab);
@@ -173,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
                 task.archived = DbContract.ToDoEntry.NOT_ARCHIVED_CODE;
                 updateTask(task);
             }
-            lrva.notifyDataSetChanged();
+            //lrva.notifyDataSetChanged();
         }));
         snb.show();
     }
