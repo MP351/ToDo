@@ -2,6 +2,7 @@ package com.example.maxpayne.mytodoapp.db;
 
 import android.app.Application;
 import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.os.AsyncTask;
 
 import com.example.maxpayne.mytodoapp.db.DbContract;
@@ -31,6 +32,14 @@ public class TaskRepository{
 
     public LiveData<List<Task>> getTasks() {
         return db.taskDao().getAllAsLiveData();
+    }
+
+    public LiveData<List<Task>> getActive() {
+        return db.taskDao().getActiveTasks();
+    }
+
+    public LiveData<List<Task>> getArchived() {
+        return db.taskDao().getArchived();
     }
 
     public LiveData<List<Task>> getTasks(int archiveCode, int completeCode) {

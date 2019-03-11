@@ -9,6 +9,8 @@ import android.support.annotation.Nullable;
 
 import com.example.maxpayne.mytodoapp.db.DbContract;
 
+import java.util.Objects;
+
 @Entity(tableName = DbContract.ToDoEntry.TABLE_NAME)
 public class Task {
 
@@ -80,4 +82,23 @@ public class Task {
     @NonNull
     @ColumnInfo(name = DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED)
     public Integer archived;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task1 = (Task) o;
+        return Objects.equals(_id, task1._id) &&
+                Objects.equals(task, task1.task) &&
+                Objects.equals(add_date, task1.add_date) &&
+                Objects.equals(end_date, task1.end_date) &&
+                Objects.equals(complete, task1.complete) &&
+                Objects.equals(description, task1.description) &&
+                Objects.equals(archived, task1.archived);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_id, task, add_date, end_date, complete, description, archived);
+    }
 }

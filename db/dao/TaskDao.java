@@ -21,12 +21,12 @@ public interface TaskDao {
             DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED + " <> " + DbContract.ToDoEntry.ARCHIVED_CODE);
 
     String GET_NOT_ARCHIVED = "SELECT * FROM " + DbContract.ToDoEntry.TABLE_NAME + " WHERE " +
-            DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED + " + " + DbContract.ToDoEntry.NOT_ARCHIVED_CODE +
+            DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED + " = " + DbContract.ToDoEntry.NOT_ARCHIVED_CODE +
             " AND " +
             DbContract.ToDoEntry.COLUMN_NAME_COMPLETE + " = :completeCode";
 
     String GET_ARCHIVED = "SELECT * FROM " + DbContract.ToDoEntry.TABLE_NAME + " WHERE " +
-            DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED + " + " + DbContract.ToDoEntry.ARCHIVED_CODE;
+            DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED + " = " + DbContract.ToDoEntry.ARCHIVED_CODE;
 
     String GET_TEMPLATE = "SELECT * FROM " + DbContract.ToDoEntry.TABLE_NAME + " WHERE " +
             DbContract.ToDoEntry.COLUMN_NAME_ARCHIVED + " = :archivedCode AND " +
@@ -37,6 +37,9 @@ public interface TaskDao {
 
     @Query(GET_TEMPLATE)
     LiveData<List<Task>> getTasks(int archivedCode, int completeCode);
+
+    @Query(GET_ACTIVE_SQL)
+    LiveData<List<Task>> getActiveTasks();
 
     @Query(GET_ARCHIVED)
     LiveData<List<Task>> getArchived();
