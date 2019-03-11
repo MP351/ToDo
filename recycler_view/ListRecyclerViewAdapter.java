@@ -67,7 +67,7 @@ public class ListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHo
 
     @Override
     public void onLeftSwipe(int position) {
-        Task task = mDiffer.getCurrentList().get(position);
+        Task task = new Task(mDiffer.getCurrentList().get(position));
 
         if (task.archived == DbContract.ToDoEntry.NOT_ARCHIVED_CODE) {
             switch (task.complete) {
