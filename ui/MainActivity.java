@@ -1,34 +1,28 @@
 package com.example.maxpayne.mytodoapp.ui;
 
-import android.app.Activity;
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProvider;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatSpinner;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.view.Menu;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.view.MenuItem;
 
 import com.example.maxpayne.mytodoapp.recycler_view.ItemTouchHelperCallback;
 import com.example.maxpayne.mytodoapp.recycler_view.ListRecyclerViewAdapter;
 import com.example.maxpayne.mytodoapp.recycler_view.TaskViewModel;
-import com.example.maxpayne.mytodoapp.ui.AddDialog;
-import com.example.maxpayne.mytodoapp.ui.DetailTaskDialog;
 import com.example.maxpayne.mytodoapp.R;
 import com.example.maxpayne.mytodoapp.db.DbContract;
 import com.example.maxpayne.mytodoapp.db.dao.Task;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements AddDialog.NoticeDialogListener,
         DetailTaskDialog.NoticeDialogListener, ListRecyclerViewAdapter.dbWorkListener {
@@ -39,16 +33,16 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
     TaskViewModel tvm;
     ItemTouchHelperCallback ithc;
     ConstraintLayout cl;
+    DrawerLayout dl;
     AppCompatActivity activity = this;
+    Integer lastNavAction;
+    final String LAST_NAV_ACTION_CODE = "LAST_ACTION";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_rv);
         initViews();
-
-        myTb.setNavigationIcon(R.mipmap.icon_launcher);
-        setSupportActionBar(myTb);
 
         ithc = new ItemTouchHelperCallback(lrva);
         ItemTouchHelper touchHelper = new ItemTouchHelper(ithc);
@@ -57,64 +51,30 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
         tvm = ViewModelProvider.AndroidViewModelFactory
                 .getInstance(getApplication()).create(TaskViewModel.class);
 
-        tvm.getTasks().observe(this, (tasks) -> lrva.setData(tasks));
-
-
         fab.setOnClickListener((view -> openAddingDialog()));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        queryData(lastNavAction == null ? R.id.nav_active : lastNavAction);
+
+        tvm.getTasks().observe(this, (tasks) -> lrva.setData(tasks));
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                dl.openDrawer(GravityCompat.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void openAddingDialog() {
         AddDialog addDialog = new AddDialog();
         addDialog.show(getSupportFragmentManager(), "AddDiag");
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        final String[] array = getResources().getStringArray(R.array.groups);
-        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1,
-                array);
-
-        AppCompatSpinner spinner = findViewById(R.id.ab_menu_spinner);
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                tvm.getTasks().removeObservers(activity);
-                switch (position) {
-                    //Active
-                    case 0:
-                        ithc.setSwipeEnabled(true);
-                        tvm.queryActive();
-                        break;
-                    //Incomplete
-                    case 1:
-                        ithc.setSwipeEnabled(true);
-                        tvm.queryIncomplete();
-                        break;
-                    //Complete
-                    case 2:
-                        ithc.setSwipeEnabled(true);
-                        tvm.queryComplete();
-                        break;
-                    //Cancelled
-                    case 3:
-                        ithc.setSwipeEnabled(false);
-                        tvm.queryCancelled();
-                        break;
-                    //Archived
-                    case 4:
-                        ithc.setSwipeEnabled(false);
-                        tvm.queryArchived();
-                        break;
-                }
-                tvm.getTasks().observe(activity, (tasks) -> lrva.setData(tasks));
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-            }
-        });
-        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -135,10 +95,54 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
         myTb = findViewById(R.id.RvTb);
         fab = findViewById(R.id.RvFab);
         cl = findViewById(R.id.cl_main);
+        dl = findViewById(R.id.drawer_layout);
+
+        NavigationView navigationView = findViewById(R.id.nv);
+        navigationView.setNavigationItemSelectedListener((menuItem -> {
+            menuItem.setChecked(true);
+            queryData(menuItem.getItemId());
+
+            dl.closeDrawers();
+            return true;
+        }));
 
         lrva = new ListRecyclerViewAdapter(this, getSupportFragmentManager());
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setAdapter(lrva);
+
+        setSupportActionBar(myTb);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+    }
+
+    private void queryData(Integer action) {
+        tvm.getTasks().removeObservers(activity);
+        lastNavAction = action;
+        switch (action) {
+            case R.id.nav_active:
+                tvm.queryActive();
+                ithc.setSwipeEnabled(true);
+                break;
+            case R.id.nav_incomplete:
+                tvm.queryIncomplete();
+                ithc.setSwipeEnabled(true);
+                break;
+            case R.id.nav_complete:
+                tvm.queryComplete();
+                ithc.setSwipeEnabled(false);
+                break;
+            case R.id.nav_cancelled:
+                tvm.queryCancelled();
+                ithc.setSwipeEnabled(false);
+                break;
+            case R.id.nav_archive:
+                tvm.queryArchived();
+                ithc.setSwipeEnabled(false);
+                break;
+        }
+
+        tvm.getTasks().observe(this, tasks -> lrva.setData(tasks));
     }
 
     @Override
@@ -153,20 +157,19 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
 
     @Override
     public void archiveOrCancelTask(Task task, int code) {
-        StringBuilder sb = new StringBuilder("Task ");
         Snackbar snb;
         if (code == lrva.ACTION_CODE_CANCEL) {
-            snb = Snackbar.make(cl, sb.append(" cancelled.").toString(), Snackbar.LENGTH_SHORT);
+            snb = Snackbar.make(cl, R.string.task_cancelled, Snackbar.LENGTH_SHORT);
             snb.setDuration(3000);
             updateTask(task);
         } else {
-            snb = Snackbar.make(cl, sb.append(" archived.").toString(), Snackbar.LENGTH_SHORT);
+            snb = Snackbar.make(cl, R.string.task_arcvhived, Snackbar.LENGTH_SHORT);
             snb.setDuration(3000);
             updateTask(task);
         }
 
 
-        snb.setAction("UNDO", (view -> {
+        snb.setAction(R.string.undo, (view -> {
             if (code == lrva.ACTION_CODE_CANCEL) {
                 task.complete = DbContract.ToDoEntry.INCOMPLETE_CODE;
                 updateTask(task);
@@ -176,5 +179,17 @@ public class MainActivity extends AppCompatActivity implements AddDialog.NoticeD
             }
         }));
         snb.show();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(LAST_NAV_ACTION_CODE, lastNavAction);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        lastNavAction = savedInstanceState.getInt(LAST_NAV_ACTION_CODE);
     }
 }
